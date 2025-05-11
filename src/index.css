@@ -39,6 +39,14 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-main: "Plus Jakarta Sans", sans-serif;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-display: swap;
+  src: url('./assets/fonts/PlusJakartaSans-VariableFont_wght.ttf') format('truetype');
 }
 
 :root {
