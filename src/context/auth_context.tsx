@@ -1,49 +1,35 @@
+import { type UserEntity } from "@/types/api";
 import { createContext, useContext, useReducer, type ReactNode } from "react"
 
-type User = {
-  username: string;
-  email: string;
-}
-
-type Role =  'user' | 'barber' | 'admin'
+type User = Omit<UserEntity, 'first_name' | 'last_name' | 'role' | 'id'>
+type UserEntityNoPassword = Omit<UserEntity, 'password'>
 
 export type ContextType = {
-  user: User | null
-  role: Role | null
-  isAuthenticated: boolean
+  user: UserEntityNoPassword | null
   login: (user: User) => void
   logout: () => void
 }
 
-type StateType = Omit<ContextType, 'login' | 'logout'>
-
 type AuthReducerAction = 
-  | { type: 'LOGIN';  payload: { username: string, email: string } }
+  | { type: 'LOGIN';  payload: User }
   | { type: 'LOGOUT' }
 
-
-// The AuthContext 
-const initialState: StateType = {
-  user: { username: "mkgnrl", email: "mikognrl@gmail.com"},
-  role: "admin",
-  isAuthenticated: true,
-}
 
 const AuthContext = createContext<ContextType | undefined>(undefined)
 
 export function AuthContextProvider({ children }: { children: ReactNode }) {
-  const [user, dispatch] = useReducer(authReducer, initialState)
+  const [user, dispatch] = useReducer(authReducer, null)
 
-  function login(userData: User) {
+  async function login(userData: User) {
     dispatch({ type: 'LOGIN', payload: userData })
   }
 
-  function logout() {
+  async function logout() {
     dispatch({ type: 'LOGOUT' })
   }
 
   return (
-    <AuthContext.Provider value={{ ...user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
@@ -61,23 +47,32 @@ export function useAuth(){
 }
 
 // Reducer functions
-function authReducer(state: StateType, action: AuthReducerAction): StateType {
+function authReducer(state: UserEntity | null, action: AuthReducerAction): UserEntity | null {
   switch(action.type) {
     case 'LOGIN': 
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: true,
-        role: 'user'
-      }
+      return null
     case 'LOGOUT':
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-        role: null
-      }
+      return null
     default: 
       return state
     }
 }
+
+
+//  api call
+
+//  async function loginHandler(data: LoginType) {
+//     // perform fetching in here and 
+//     const user = await new Promise<UserEntity | undefined>((resolve) => {
+//       setTimeout( () => {
+//         const user = mockUserData.find((u) => u.username === data.username || u.email === data.username)
+//         resolve(user)
+//       }, 500)
+//     }) 
+    
+//     if(user && user.password === data.password) {
+//       return user
+//     }
+
+//     return undefined
+// } 
