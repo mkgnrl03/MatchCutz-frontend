@@ -22,3 +22,6 @@ export type UserEntity = Entity<{
   role: Array<Role>
   password: string
 }>
+
+export type LoginDetails = Omit<UserEntity, 'first_name' | 'last_name' | 'role' | 'id' | 'email'>
+export type UserEntityNoPassword = Omit<UserEntity, 'password'>

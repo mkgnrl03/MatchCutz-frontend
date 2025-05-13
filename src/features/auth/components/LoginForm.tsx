@@ -5,37 +5,37 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Loader } from 'lucide-react'
-import type { UserEntity } from "@/types/api"
-import { mockUserData } from "@/mocks/user-data"
+import { useAuth } from "@/context/auth_context"
+import { handleLogin } from "../api/login_handler"
+import { useState } from "react"
+import { useNavigate } from "react-router"
 
 function LoginForm() {
-
+  const [error, setError] = useState<string>("")
+  const [hasError, setHasError] = useState<boolean>(false)
+  const authContext = useAuth()
+  const navigate = useNavigate()
+  
    const defaultUser: LoginType = {
     username: '',
     password: ''
   }
 
-  async function loginHandler(data: LoginType) {
-    // perform fetching in here and 
-    const user = await new Promise<UserEntity | undefined>((resolve) => {
-      setTimeout( () => {
-        const user = mockUserData.find((u) => u.username === data.username || u.email === data.username)
-        resolve(user)
-      }, 500)
-    }) 
-    
-    if(user && user.password === data.password) {
-      return user
-    }
-
-    return undefined
-  } 
-
   const form = useForm({
     defaultValues: defaultUser,
     validators: { onChange: loginSchema },
     onSubmit: async ({ value }) => {
-      await loginHandler(value)
+      setError("")
+      setHasError(false)
+      const response = await handleLogin(value)
+
+      if(!response) {
+        setError("Invalid login credentials")
+        setHasError(true)
+        return
+      }
+      authContext.updateLoggedUser(response)
+      navigate("/")
     }
   })
 
@@ -48,9 +48,20 @@ function LoginForm() {
         form.handleSubmit()
       }}
     >
-      <Label className="text-2xl font-bold self-center mb-6">
+      <Label className="text-2xl font-bold self-center mb-5">
         Login.
       </Label>
+
+      {
+        hasError 
+          ?  <div className="mb-1 flex items-center justify-center text-red-500 bg-red-100/50 border border-red-500 p-2 rounded">
+              <Label className="font-semibold text-sm">
+                {error}
+              </Label>
+            </div>
+          : ""
+      }
+     
 
       <form.Field
         name="username"

@@ -1,35 +1,23 @@
-import { type UserEntity } from "@/types/api";
-import { createContext, useContext, useReducer, type ReactNode } from "react"
-
-type User = Omit<UserEntity, 'first_name' | 'last_name' | 'role' | 'id'>
-type UserEntityNoPassword = Omit<UserEntity, 'password'>
+import { mockUserData } from "@/mocks/user-data";
+import type {UserEntityNoPassword } from "@/types/api";
+import { createContext, useContext, useState, type ReactNode } from "react"
 
 export type ContextType = {
-  user: UserEntityNoPassword | null
-  login: (user: User) => void
-  logout: () => void
+  user: UserEntityNoPassword | undefined
+  updateLoggedUser: (response: UserEntityNoPassword) => void
 }
-
-type AuthReducerAction = 
-  | { type: 'LOGIN';  payload: User }
-  | { type: 'LOGOUT' }
-
 
 const AuthContext = createContext<ContextType | undefined>(undefined)
 
 export function AuthContextProvider({ children }: { children: ReactNode }) {
-  const [user, dispatch] = useReducer(authReducer, null)
+  const [user, setUser] = useState<UserEntityNoPassword | undefined>(mockUserData[0])
 
-  async function login(userData: User) {
-    dispatch({ type: 'LOGIN', payload: userData })
-  }
-
-  async function logout() {
-    dispatch({ type: 'LOGOUT' })
+  function updateLoggedUser (response: UserEntityNoPassword) {
+    setUser(response)
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, updateLoggedUser }}>
       {children}
     </AuthContext.Provider>
   )
@@ -45,34 +33,3 @@ export function useAuth(){
 
   return context
 }
-
-// Reducer functions
-function authReducer(state: UserEntity | null, action: AuthReducerAction): UserEntity | null {
-  switch(action.type) {
-    case 'LOGIN': 
-      return null
-    case 'LOGOUT':
-      return null
-    default: 
-      return state
-    }
-}
-
-
-//  api call
-
-//  async function loginHandler(data: LoginType) {
-//     // perform fetching in here and 
-//     const user = await new Promise<UserEntity | undefined>((resolve) => {
-//       setTimeout( () => {
-//         const user = mockUserData.find((u) => u.username === data.username || u.email === data.username)
-//         resolve(user)
-//       }, 500)
-//     }) 
-    
-//     if(user && user.password === data.password) {
-//       return user
-//     }
-
-//     return undefined
-// } 
